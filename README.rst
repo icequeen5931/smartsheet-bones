@@ -5,6 +5,7 @@ Smartsheet Bones
 A dead simple API client for Smartsheet.
 
 .. code-block:: console
+
     Usage: smartbones [OPTIONS] COMMAND [ARGS]...
 
     Options:
@@ -22,7 +23,7 @@ List Sheets
 
 .. code-block:: console
 
-    Usage: smartbones.py sheets [OPTIONS]
+    Usage: smartbones sheets [OPTIONS]
 
     Options:
       -i, --id  Show Sheet IDs
@@ -49,11 +50,11 @@ Set Smartsheet API Access Token
 
 .. code-block:: console
 
-Usage: smartbones token [OPTIONS]
+    Usage: smartbones token [OPTIONS]
 
-Options:
-  --password TEXT
-  --help           Show this message and exit.
+    Options:
+      --password TEXT
+      --help           Show this message and exit.
 
 
 Add Rows
