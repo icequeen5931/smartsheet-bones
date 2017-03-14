@@ -1,0 +1,79 @@
+{
+  "accessLevel": "OWNER",
+  "projectSettings": {
+    "workingDays": ["MONDAY", "TUESDAY", "WEDNESDAY"],
+    "nonWorkingDays": ["2018-01-01"],
+    "lengthOfDay": 6
+  }, "columns": [
+    {
+      "id": 4583173393803140,
+        "index": 0,
+        "primary": true,
+        "title": "Primary Column",
+        "type": "TEXT_NUMBER"
+    }, {
+        "id": 2331373580117892,
+        "index": 1,
+        "options": ["new", "in progress", "completed"],
+        "title": "status",
+        "type": "PICKLIST"
+    }, {
+        "id": 5146123347224452,
+        "index": 1,
+        "options": ["new", "in progress", "completed"],
+        "title": "status",
+        "type": "PICKLIST"
+    }
+  ],
+  "createdAt": "2012-07-24T18:22:29-07:00",
+  "id": 4583173393803140,
+  "modifiedAt": "2012-07-24T18:30:52-07:00",
+  "name": "sheet 1",
+  "permalink": "https://app.smartsheet.com/b/home?lx=pWNSDH9itjBXxBzFmyf-5w",
+  "rows": [
+    {
+      "id": 3326917907257764,
+      "rowNumber": 1,
+      "expanded": true,
+      "createdAt": "2015-09-02T15:05:18Z",
+      "modifiedAt": "2015-09-02T17:33:50Z",
+      "cells": [
+        {
+          "columnId": 7960873114331012,
+          "value": false,
+          "displayValue": null
+        }, {
+          "columnId": 642523719853956,
+          "value": "new value",
+          "displayValue": "new value"
+        }, {
+          "columnId": 5146123347224452,
+          "value": "new",
+          "displayValue": "new"
+        }
+      ]
+    }, {
+      "id": 5584117714643912,
+      "rowNumber": 2,
+      "parentId": 3326917907257764,
+      "expanded": true,
+      "createdAt": "2015-09-02T15:05:18Z",
+      "modifiedAt": "2015-09-02T15:29:16Z",
+      "cells": [
+        {
+          "columnId": 7960873114331012,
+          "value": true,
+          "displayValue": null
+        }, {
+          "columnId": 642523719853956,
+          "value": "desc_updated",
+          "displayValue": "desc_updated"
+        }, {
+          "columnId": 5146123347224452,
+          "value": "completed",
+          "displayValue": "completed"
+        }
+      ]
+    }
+  ]
+}
