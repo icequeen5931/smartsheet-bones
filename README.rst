@@ -17,7 +17,7 @@ A dead simple API client for Smartsheet.
       token
 
 
-LIST SHEETS
+List Sheets
 -----------
 
 .. code-block:: console
@@ -29,7 +29,7 @@ LIST SHEETS
       --help    Show this message and exit.
 
 
-GET ROWS in SHEET
+Get Rows in Sheet 
 -----------------
 
 .. code-block:: console
@@ -44,7 +44,7 @@ GET ROWS in SHEET
       --help         Show this message and exit.
 
 
-SET SMARTSHEET API ACCESS TOKEN
+Set Smartsheet API Access Token
 -------------------------------
 
 .. code-block:: console
@@ -56,11 +56,11 @@ Options:
   --help           Show this message and exit.
 
 
-ADD ROWS
+Add Rows
 --------
 Under construction.
 
 
-UPDATE ROWS
+Update Rows
 -----------
 Under construction.
