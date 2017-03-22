@@ -5,8 +5,8 @@ import click
 import pytest
 
 from smartbones import (
-    get_contacts, get_columns, get_column_types, get_rows, get_sheet_id,
-    get_sheets, get_token, map_columns, set_token
+    add_rows, get_contacts, get_columns, get_column_types, get_rows,
+    get_sheet_id, get_sheets, get_token, set_token, update_rows
 )
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__)) + '\\testdata'
@@ -62,33 +62,6 @@ def test_get_contacts():
     get_contacts({}) == {}
 
 
-def test_map_columns():
-    columns = get_columns(load('get_columns'))
-    sheets = load('get_sheet')['rows']
-    row = sheets[0]
-
-    expected = {
-        'Favorite': False, 'Primary Column': 'new value', 'Status': 'new'
-    }
-    assert map_columns(row, columns) == expected
-    assert map_columns(row, columns, extra_keys=['bad key']) == expected
-
-    expected = {
-        'Favorite': None, 'Primary Column': 'new value', 'Status': 'new'
-    }
-    assert map_columns(row, columns, val_key='displayValue') == expected
-
-    row = sheets[1]
-    expected = {'id': 5584117714643912,
-                'parentId': 3326917907257764,
-                'rowNumber': 2,
-                'Favorite': True,
-                'Primary Column': 'desc_updated',
-                'Status': 'completed'}
-    extra_keys = ['id', 'parentId', 'rowNumber']
-    assert map_columns(row, columns, extra_keys=extra_keys) == expected
-
-
 def test_get_rows():
     columns = load('get_columns')
     sheet = load('get_sheet')
@@ -138,3 +111,29 @@ def test_get_rows():
     ]
     extra_keys = ['id', 'parentId', 'rowNumber']
     assert get_rows(sheet, columns, extra_keys=extra_keys) == expected
+
+
+def test_add_rows():
+    data = [{'Favorite': False, 'Primary Column': 'newer status'},
+            {'Favorite': True, 'Primary Column': 'updated row'}]
+    columns = load('get_columns')
+    expected = load('add_rows')
+    assert add_rows(columns, data) == expected
+
+
+def test_update_rows():
+    sheet = load('get_sheet')
+    expected = load('update_rows')
+    key = 'Primary Column'
+    data = [{
+        "Favorite": True,
+        "Primary Column": "new value"
+    }, {
+        "Favorite": False,
+        "Primary Column": "desc_updated",
+        "Status": "In Progress"
+    }]
+    assert update_rows(sheet, data, key=key, strict=False) == expected
+
+    data = [{"Favorite": True, "Primary Column": "missing key"}]
+    assert update_rows(sheet, data, key=key, strict=False) == []

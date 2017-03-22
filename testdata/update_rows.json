@@ -1,20 +1,6 @@
 [
   {
-    "toTop":true,
-    "cells": [
-      {
-        "columnId": 7960873114331012,
-        "value": false,
-        "strict": false
-      }, {
-        "columnId": 642523719853956,
-        "value": "newer status",
-        "strict": false
-      }
-    ]
-  },
-  {
-    "toTop":true,
+    "id": 3326917907257764,
     "cells": [
       {
         "columnId": 7960873114331012,
@@ -22,7 +8,24 @@
         "strict": false
       }, {
         "columnId": 642523719853956,
-        "value": "updated row",
+        "value": "new value",
+        "strict": false
+      }
+    ]
+  }, {
+    "id": 5584117714643912,
+    "cells": [
+      {
+        "columnId": 7960873114331012,
+        "value": false,
+        "strict": false
+      }, {
+        "columnId": 642523719853956,
+        "value": "desc_updated",
+        "strict": false
+      }, {
+        "columnId": 5146123347224452,
+        "value": "In Progress",
         "strict": false
       }
     ]

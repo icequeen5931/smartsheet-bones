@@ -44,12 +44,6 @@ def set_token(access_token, app_dir='Bones'):
         click.echo(str(e), err=True)
 
 
-def add_rows(rows, columns, to_top=True):
-    columns = {v: k for k, v in get_columns(columns)}
-    return [{'cells': [{'columnId': columns[k], 'value': v}
-            for k, v in row.items() if k in columns]} for row in rows]
-
-
 def get_columns(columns):
     return {i['id']: i['title'] for i in columns.get('data', [])}
 
@@ -74,19 +68,82 @@ def get_sheets(sheets):
     return {i['name']: i['id'] for i in sheets.get('data', [])}
 
 
-def map_columns(row, columns, val_key='value', extra_keys=None):
-    cells = row.get('cells', [])
-    data = {columns[cell['columnId']]: cell.get(val_key) for cell in cells}
-    if extra_keys:
-        data.update({k: row[k] for k in extra_keys if k in row})
-    return data
-
-
 def get_rows(sheet, columns, disp_val=False, extra_keys=None):
+
+    def map_columns(row, columns, val_key='value', extra_keys=None):
+        cells = row.get('cells', [])
+        data = {columns[cell['columnId']]: cell.get(val_key) for cell in cells}
+        if extra_keys:
+            data.update({k: row[k] for k in extra_keys if k in row})
+        return data
+
+    rows = sheet.get('rows', [])
+    columns = {i['id']: i['title'] for i in sheet.get('columns', [])}
+    val_key = 'displayValue' if disp_val else 'value'
+    return [map_columns(row, columns, val_key, extra_keys) for row in rows]
+
+
+"""
+def get_rows(sheet, columns, disp_val=False, extra_keys=None):
+
+    def map_columns(row, columns, val_key='value', extra_keys=None):
+        cells = row.get('cells', [])
+        data = {columns[cell['columnId']]: cell.get(val_key) for cell in cells}
+        if extra_keys:
+            data.update({k: row[k] for k in extra_keys if k in row})
+        return data
+
     rows = sheet.get('rows', [])
     columns = get_columns(columns)
     val_key = 'displayValue' if disp_val else 'value'
     return [map_columns(row, columns, val_key, extra_keys) for row in rows]
+"""
+
+
+def get_column_id(sheet, key):
+    for column in sheet.get('columns', []):
+        if column['title'] == key:
+            return column['id']
+
+
+def add_rows(columns, data, to_top=True, strict=False):
+
+    def set_cells(columns, key, value, strict):
+        return {'columnId': columns[key], 'value': value, 'strict': strict}
+
+    def add_row(columns, row, to_top, strict):
+        cells = [set_cells(columns, k, v, strict) for k, v in row.items()]
+        return {'toTop': to_top, 'cells': cells}
+
+    columns = {v: k for k, v in get_columns(columns).items()}
+    return [add_row(columns, i, to_top, strict) for i in data]
+
+
+def update_rows(sheet, updates, key=None, strict=False):
+
+    def get_row_id(rows, key_id, value):
+        for row in rows:
+            for cell in row['cells']:
+                if (cell['columnId'] == key_id and cell['value'] == value):
+                    return row['id']
+
+    def set_cells(columns, key, value, strict):
+        return {'columnId': columns.get(key), 'value': value, 'strict': strict}
+
+    def update_row(rows, columns, new_row, key, key_id, strict):
+        value = new_row.get(key)
+        cells = [set_cells(columns, k, v, strict) for k, v in new_row.items()]
+        row_id = get_row_id(rows, key_id, value)
+        if row_id is not None:
+            return {'id': row_id, 'cells': cells}
+
+    rows = sheet.get('rows', [])
+    cols = {i['title']: i['id'] for i in sheet.get('columns', [])}
+    key_id = cols.get(key)
+    if key_id:
+        results = [update_row(rows, cols, i, key, key_id, strict)
+                   for i in updates]
+        return [i for i in results if i is not None]
 
 
 @click.group()

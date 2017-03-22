@@ -6,22 +6,21 @@
     "lengthOfDay": 6
   }, "columns": [
     {
-      "id": 4583173393803140,
+        "id": 7960873114331012,
         "index": 0,
+        "symbol": "STAR",
+        "title": "Favorite",
+        "type": "CHECKBOX"
+    }, {
+        "id": 642523719853956,
+        "index": 1,
         "primary": true,
         "title": "Primary Column",
         "type": "TEXT_NUMBER"
     }, {
-        "id": 2331373580117892,
-        "index": 1,
-        "options": ["new", "in progress", "completed"],
-        "title": "status",
-        "type": "PICKLIST"
-    }, {
         "id": 5146123347224452,
-        "index": 1,
-        "options": ["new", "in progress", "completed"],
-        "title": "status",
+        "index": 2,
+        "title": "Status",
         "type": "PICKLIST"
     }
   ],
