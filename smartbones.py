@@ -45,7 +45,7 @@ def set_token(access_token, app_dir='Bones'):
 
 
 def get_columns(columns):
-    return {i['id']: i['title'] for i in columns.get('data', [])}
+    return
 
 
 def get_column_types(columns):
@@ -98,7 +98,7 @@ def add_rows(columns, data, to_top=True, strict=False):
         cells = [set_cells(columns, k, v, strict) for k, v in row.items()]
         return {'toTop': to_top, 'cells': cells}
 
-    columns = {v: k for k, v in get_columns(columns).items()}
+    columns = {i['title']: i['id'] for i in columns.get('data', [])}
     return [add_row(columns, i, to_top, strict) for i in data]
 
 
