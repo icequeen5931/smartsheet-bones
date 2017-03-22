@@ -83,23 +83,6 @@ def get_rows(sheet, columns, disp_val=False, extra_keys=None):
     return [map_columns(row, columns, val_key, extra_keys) for row in rows]
 
 
-"""
-def get_rows(sheet, columns, disp_val=False, extra_keys=None):
-
-    def map_columns(row, columns, val_key='value', extra_keys=None):
-        cells = row.get('cells', [])
-        data = {columns[cell['columnId']]: cell.get(val_key) for cell in cells}
-        if extra_keys:
-            data.update({k: row[k] for k in extra_keys if k in row})
-        return data
-
-    rows = sheet.get('rows', [])
-    columns = get_columns(columns)
-    val_key = 'displayValue' if disp_val else 'value'
-    return [map_columns(row, columns, val_key, extra_keys) for row in rows]
-"""
-
-
 def get_column_id(sheet, key):
     for column in sheet.get('columns', []):
         if column['title'] == key:
