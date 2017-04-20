@@ -5,7 +5,7 @@ import click
 import pytest
 
 from smartbones import (
-    add_rows, get_contacts, get_columns, get_column_types, get_rows,
+    add_rows, get_contacts, get_column_types, get_rows,
     get_sheet_id, get_sheets, get_token, set_token, update_rows
 )
 
@@ -39,13 +39,14 @@ def test_get_sheet_id():
     with pytest.raises(SystemExit):
         assert get_sheet_id('Sheet Not Found', sheets)
 
-
+"""
 def test_get_columns():
     result = {7960873114331012: 'Favorite',
               642523719853956: 'Primary Column',
               5146123347224452: 'Status'}
     assert get_columns(load('get_columns')) == result
     assert get_columns({}) == {}
+"""
 
 
 def test_get_column_types():
@@ -118,7 +119,7 @@ def test_add_rows():
             {'Favorite': True, 'Primary Column': 'updated row'}]
     columns = load('get_columns')
     expected = load('add_rows')
-    assert add_rows(columns, data) == expected
+    assert add_rows(data, columns) == expected
 
 
 def test_update_rows():
