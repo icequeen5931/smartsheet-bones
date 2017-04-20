@@ -10,7 +10,6 @@ from smartbones import (
 )
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__)) + '\\testdata'
-print(CUR_DIR)
 
 
 def load(filename):
