@@ -2,23 +2,30 @@ import codecs
 import json
 import os
 import sys
-from functools import partial
 
 import click
 import requests
 from requests import RequestException, HTTPError
 
 
-def request(url, data=None):
+def package_request(url, data, access_token):
     url = 'https://api.smartsheet.com/2.0/' + url
-    hdr = {'Authorization': 'Bearer ' + get_token(),
-           'Content-Type': 'application/json'}
+    auth = 'Bearer ' + access_token
+    headers = {'Authorization': auth, 'Content-Type': 'application/json'}
+    params = {}
     if data:
-        request_ = partial(requests.post, data=json.dumps(data))
+        method = 'post'
+        data = json.dumps(data)
     else:
-        request_ = partial(requests.get, params={'includeAll': True})
+        method = 'get'
+        params['includeAll'] = True
+    return method, url, {'data': data, 'headers': headers, 'params': params}
+
+
+def request(url, data=None):
+    method, url, kwds = package_request(url, data, get_token())
     try:
-        response = request_(url, headers=hdr)
+        response = getattr(requests, method)(url, **kwds)
         response.raise_for_status()
         return response.json()
     except (RequestException, HTTPError, TypeError) as e:
