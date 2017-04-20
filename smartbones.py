@@ -2,6 +2,7 @@ import codecs
 import json
 import os
 import sys
+from functools import partial
 
 import click
 import requests
@@ -10,11 +11,14 @@ from requests import RequestException, HTTPError
 
 def request(url, data=None):
     url = 'https://api.smartsheet.com/2.0/' + url
-    hdr = {'Authorization': 'Bearer ' + get_token()}
-    params = {'includeAll': True}
-    request = getattr(requests, ('post' if data else 'get'))
+    hdr = {'Authorization': 'Bearer ' + get_token(),
+           'Content-Type': 'application/json'}
+    if data:
+        request_ = partial(requests.post, data=json.dumps(data))
+    else:
+        request_ = partial(requests.get, params={'includeAll': True})
     try:
-        response = request(url, headers=hdr, params=params)
+        response = request_(url, headers=hdr)
         response.raise_for_status()
         return response.json()
     except (RequestException, HTTPError, TypeError) as e:
@@ -42,10 +46,6 @@ def set_token(access_token, app_dir='Bones'):
             click.echo('Access token saved.')
     except EnvironmentError as e:
         click.echo(str(e), err=True)
-
-
-def get_columns(columns):
-    return
 
 
 def get_column_types(columns):
@@ -89,13 +89,14 @@ def get_column_id(sheet, key):
             return column['id']
 
 
-def add_rows(columns, data, to_top=True, strict=False):
+def add_rows(data, columns, to_top=True, strict=False):
 
     def set_cells(columns, key, value, strict):
         return {'columnId': columns[key], 'value': value, 'strict': strict}
 
     def add_row(columns, row, to_top, strict):
-        cells = [set_cells(columns, k, v, strict) for k, v in row.items()]
+        cells = [set_cells(columns, k, v, strict)
+                 for k, v in row.items() if k in columns]
         return {'toTop': to_top, 'cells': cells}
 
     columns = {i['title']: i['id'] for i in columns.get('data', [])}
@@ -136,17 +137,38 @@ def cli():
 
 @cli.command()
 @click.argument('sheet_name')
-@click.argument('rows')
+@click.argument('rows', type=click.File())
 def add(sheet_name, rows):
+    import pdb; pdb.set_trace()
     sheet_id = get_sheet_id(sheet_name, request('sheets'))
     columns = request('sheets/{}/columns'.format(sheet_id))
-    data = add_rows(rows, columns)
+    data = add_rows(json.load(rows), columns)
     response = request('sheets/{}/rows'.format(sheet_id), data)
-    click.echo(json.dumps(response, index=True))
+    click.echo(json.dumps(response, indent=2, sort_keys=True))
 
 
 @cli.command()
-@click.option('-i', '--id', 'id_', is_flag=True, help='Show Sheet IDs')
+@click.argument('sheet_name')
+@click.option('-d', '--display', is_flag=True,
+              help='Use display value instead of the raw value')
+@click.option('-a', '--all', is_flag=True,
+              help='Include the Sheet ID, Parent ID & Row Number')
+@click.option('-i', '--id', is_flag=True,
+              help='Include the Sheet ID')
+@click.option('-p', '--parent', 'parentId', is_flag=True,
+              help='Include the Parent ID')
+@click.option('-r', '--rownum', 'rowNumber', is_flag=True,
+              help='Include the Row Number')
+def rows(sheet_name, display, **kwds):
+    extra_keys = [k for k, v in kwds.items() if v]
+    sheet_id = get_sheet_id(sheet_name, request('sheets'))
+    columns = request('sheets/{}/columns'.format(sheet_id))
+    sheet = request('sheets/{}'.format(sheet_id))
+    rows = get_rows(sheet, columns, display, extra_keys)
+    print(json.dumps(rows, indent=2, sort_keys=True))
+
+
+@cli.command()
 def sheets(id_):
     sheets_ = get_sheets(request('sheets'))
     if id_:
@@ -159,28 +181,10 @@ def sheets(id_):
 
 
 @cli.command()
-@click.argument('sheet_name')
-@click.option('-d', '--display', is_flag=True,
-              help='Use display value instead of the raw value')
-@click.option('-i', '--id', is_flag=True,
-              help='Include the Sheet ID')
-@click.option('-p', '--parent', 'parentId', is_flag=True,
-              help='Include the parent ID')
-@click.option('-r', '--rownum', 'rowNumber', is_flag=True,
-              help='Include the row number')
-def sheet(sheet_name, display, **kwds):
-    extra_keys = [k for k, v in kwds.items() if v]
-    sheet_id = get_sheet_id(sheet_name, request('sheets'))
-    columns = request('sheets/{}/columns'.format(sheet_id))
-    sheet = request('sheets/{}'.format(sheet_id))
-    rows = get_rows(sheet, columns, display, extra_keys)
-    click.echo(json.dumps(rows, indent=2, sort_keys=True))
-
-
-@cli.command()
 @click.password_option()
 def token(password):
     set_token(password)
+
 
 if __name__ == '__main__':
     cli()
