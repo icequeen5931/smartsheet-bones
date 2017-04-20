@@ -146,7 +146,6 @@ def cli():
 @click.argument('sheet_name')
 @click.argument('rows', type=click.File())
 def add(sheet_name, rows):
-    import pdb; pdb.set_trace()
     sheet_id = get_sheet_id(sheet_name, request('sheets'))
     columns = request('sheets/{}/columns'.format(sheet_id))
     data = add_rows(json.load(rows), columns)
