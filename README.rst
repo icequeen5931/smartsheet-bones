@@ -6,15 +6,15 @@ A dead simple API client for Smartsheet.
 
 .. code-block:: console
 
-Usage: smartbones.py [OPTIONS] COMMAND [ARGS]...
+  Usage: smartbones.py [OPTIONS] COMMAND [ARGS]...
 
-Options:
-  --help  Show this message and exit.
+  Options:
+    --help  Show this message and exit.
 
-Commands:
-  add
-  sheets
-  token
+  Commands:
+    add
+    sheets
+    token
 
 
 List Sheets
