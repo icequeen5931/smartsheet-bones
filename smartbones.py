@@ -10,6 +10,8 @@ from requests import RequestException, HTTPError
 from slugs import slugify
 from textmenu import get_colored_enumerated_list
 
+__version__ = '0.2.0'
+
 
 def package_request(url, data, access_token):
     url = 'https://api.smartsheet.com/2.0/' + url
