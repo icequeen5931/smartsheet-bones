@@ -7,6 +7,9 @@ import click
 import requests
 from requests import RequestException, HTTPError
 
+from slugs import slugify
+from textmenu import get_colored_enumerated_list
+
 
 def package_request(url, data, access_token):
     url = 'https://api.smartsheet.com/2.0/' + url
@@ -29,7 +32,7 @@ def request(url, data=None):
         response.raise_for_status()
         return response.json()
     except (RequestException, HTTPError, TypeError) as e:
-        click.echo(str(e), err=True)
+        print(str(e), file=sys.stderr)
         sys.exit(1)
 
 
@@ -63,37 +66,41 @@ def get_contacts(contacts):
     return {i['name']: i['email'] for i in contacts.get('data', [])}
 
 
-def get_sheet_id(sheet_name, sheets):
-    try:
-        return get_sheets(sheets)[sheet_name]
-    except KeyError as e:
-        click.echo('ERROR: Sheet {} not found.'.format(e), err=True)
-        sys.exit()
-
-
 def get_sheets(sheets):
     return {i['name']: i['id'] for i in sheets.get('data', [])}
 
 
-def get_rows(sheet, columns, disp_val=False, extra_keys=None):
+def get_rows(sheet):
 
-    def map_columns(row, columns, val_key='value', extra_keys=None):
+    def map_cells(row, columns):
         cells = row.get('cells', [])
-        data = {columns[cell['columnId']]: cell.get(val_key) for cell in cells}
-        if extra_keys:
-            data.update({k: row[k] for k in extra_keys if k in row})
-        return data
+        row['values'] = {columns[c['columnId']]: c['value']
+                         for c in cells if 'value' in c}
+        row['displayValues'] = {columns[c['columnId']]: c.get('displayValue')
+                                for c in cells if 'displayValue' in c}
+        del row['cells']
+        return row
 
     rows = sheet.get('rows', [])
     columns = {i['id']: i['title'] for i in sheet.get('columns', [])}
-    val_key = 'displayValue' if disp_val else 'value'
-    return [map_columns(row, columns, val_key, extra_keys) for row in rows]
+    return [map_cells(row, columns) for row in rows]
 
 
 def get_column_id(sheet, key):
     for column in sheet.get('columns', []):
         if column['title'] == key:
             return column['id']
+
+
+def get_sheet_id(name):
+    sheets_ = request('sheets').get('data', [])
+    names = slugify([i['name'] for i in sheets_])
+    try:
+        index = int(name) - 1 if name.isdigit() else names.index(slugify(name))
+        return sheets_[index]['id']
+    except (IndexError, ValueError):
+        print('Sheet not found.', file=sys.stderr)
+        sys.exit(1)
 
 
 def add_rows(data, columns, to_top=True, strict=False):
@@ -143,46 +150,28 @@ def cli():
 
 
 @cli.command()
-@click.argument('sheet_name')
+@click.argument('name')
 @click.argument('rows', type=click.File())
-def add(sheet_name, rows):
-    sheet_id = get_sheet_id(sheet_name, request('sheets'))
-    columns = request('sheets/{}/columns'.format(sheet_id))
+def add(name, rows):
+    id_ = get_sheet_id(name)
+    columns = request('sheets/{id_}/columns'.format(id_=id_))
     data = add_rows(json.load(rows), columns)
-    response = request('sheets/{}/rows'.format(sheet_id), data)
+    response = request('sheets/{id_}/rows'.format(id_=id_), data)
     click.echo(json.dumps(response, indent=2, sort_keys=True))
 
 
 @cli.command()
-@click.argument('sheet_name')
-@click.option('-d', '--display', is_flag=True,
-              help='Use display value instead of the raw value')
-@click.option('-a', '--all', is_flag=True,
-              help='Include the Sheet ID, Parent ID & Row Number')
-@click.option('-i', '--id', is_flag=True,
-              help='Include the Sheet ID')
-@click.option('-p', '--parent', 'parentId', is_flag=True,
-              help='Include the Parent ID')
-@click.option('-r', '--rownum', 'rowNumber', is_flag=True,
-              help='Include the Row Number')
-def rows(sheet_name, display, **kwds):
-    extra_keys = [k for k, v in kwds.items() if v]
-    sheet_id = get_sheet_id(sheet_name, request('sheets'))
-    columns = request('sheets/{}/columns'.format(sheet_id))
-    sheet = request('sheets/{}'.format(sheet_id))
-    rows = get_rows(sheet, columns, display, extra_keys)
-    print(json.dumps(rows, indent=2, sort_keys=True))
-
-
-@cli.command()
-def sheets(id_):
-    sheets_ = get_sheets(request('sheets'))
-    if id_:
-        width = len(max(map(str, sheets_.values()), key=len)) + 1
-        for sheet, sheet_id in sorted(sheets_.items()):
-            click.echo(str(sheet_id).ljust(width) + sheet)
+@click.argument('name', nargs=-1)
+def sheets(name):
+    if name:
+        id_ = get_sheet_id(name[0])
+        sheet = request('sheets/{id_}'.format(id_=id_))
+        rows = get_rows(sheet)
+        print(json.dumps(rows, indent=2, sort_keys=True))
     else:
-        for sheet in sorted(sheets_):
+        sheets_ = request('sheets')
+        names = slugify([i['name'] for i in sheets_.get('data', [])])
+        for sheet in get_colored_enumerated_list(names):
             click.echo(sheet)
 
 
