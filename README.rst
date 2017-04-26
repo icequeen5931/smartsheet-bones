@@ -6,60 +6,57 @@ A dead simple API client for Smartsheet.
 
 .. code-block:: console
 
-    Usage: smartbones [OPTIONS] COMMAND [ARGS]...
+Usage: smartbones.py [OPTIONS] COMMAND [ARGS]...
 
-    Options:
-      --help  Show this message and exit.
+Options:
+  --help  Show this message and exit.
 
-    Commands:
-      add
-      sheet
-      sheets
-      token
+Commands:
+  add
+  sheets
+  token
 
 
 List Sheets
 -----------
+Generates an enumerated list of sheet numbers & slug names
 
 .. code-block:: console
 
-    Usage: smartbones sheets [OPTIONS]
+    Usage: smartbones sheets
 
-    Options:
-      -i, --id  Show Sheet IDs
-      --help    Show this message and exit.
 
 
 Get Rows in Sheet 
 -----------------
+The NAME can be a sheet number or a slug-name.  Use List Sheets above to
+Show the available sheets.
 
 .. code-block:: console
 
-    Usage: smartbones sheet [OPTIONS] SHEET_NAME
-
-    Options:
-      -d, --display  Use display value instead of the raw value
-      -i, --id       Include the Sheet ID
-      -p, --parent   Include the parent ID
-      -r, --rownum   Include the row number
-      --help         Show this message and exit.
+    Usage: smartbones sheets NAME
 
 
 Set Smartsheet API Access Token
 -------------------------------
+Prompts for the access token, for security reasons the access token will
+not be displayed.
 
 .. code-block:: console
 
-    Usage: smartbones token [OPTIONS]
-
-    Options:
-      --password TEXT
-      --help           Show this message and exit.
+    Usage: smartbones token
 
 
 Add Rows
 --------
-Under construction.
+Takes a JSON array of objects and adds the rows to the specified sheet.
+The NAME can be a sheet number or slug-name.  The FILE can be a filename
+or left blank for STDIN. The dash character can also be used in place of
+the FILE to indicate to force it to accept the data from STDIN. 
+
+.. code-block:: console
+
+    Usage: smartbones add NAME FILE
 
 
 Update Rows
