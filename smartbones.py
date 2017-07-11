@@ -74,12 +74,21 @@ def get_sheets(sheets):
 
 def get_rows(sheet):
 
+    def get_cell(cell):
+        if 'hyperlink' in cell:
+            return cell.get('displayValue'), cell['hyperlink'].get('url')
+        return cell.get('value')
+
+    def get_colname(cell, columns):
+        return columns[cell['columnId']]
+
     def map_cells(row, columns):
         cells = row.get('cells', [])
-        row['values'] = {columns[c['columnId']]: c['value']
-                         for c in cells if 'value' in c}
+        row['values'] = {get_colname(c, columns): get_cell(c) for c in cells
+                         if 'value' in c}
         row['displayValues'] = {columns[c['columnId']]: c.get('displayValue')
                                 for c in cells if 'displayValue' in c}
+        row['values'] = {k: v for k, v in row['values'].items()}
         del row['cells']
         return row
 
@@ -98,7 +107,7 @@ def get_sheet_id(name):
     sheets_ = request('sheets').get('data', [])
     names = slugify([i['name'] for i in sheets_])
     try:
-        index = int(name) - 1 if name.isdigit() else names.index(slugify(name))
+        index = int(name) if name.isdigit() else names.index(slugify(name))
         return sheets_[index]['id']
     except (IndexError, ValueError):
         print('Sheet not found.', file=sys.stderr)
@@ -158,8 +167,9 @@ def add(name, rows):
     id_ = get_sheet_id(name)
     columns = request('sheets/{id_}/columns'.format(id_=id_))
     data = add_rows(json.load(rows), columns)
-    response = request('sheets/{id_}/rows'.format(id_=id_), data)
-    click.echo(json.dumps(response, indent=2, sort_keys=True))
+    if data:
+        response = request('sheets/{id_}/rows'.format(id_=id_), data)
+        click.echo(json.dumps(response, indent=2, sort_keys=True))
 
 
 @cli.command()
